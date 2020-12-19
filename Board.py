@@ -93,6 +93,97 @@ class Board:
             if not i % 3:
                 print('\n')
 
+class Bot:
+    def __init__(self, board, label, turn):
+        self.board = board
+        self.label = label
+        self.turn = 0
+    
+    def update(self, board, turn):
+        self.board = board
+        self.turn = turn
+
+    def collapse(self):
+        "..."
+        return "Mark(l, self.turn-1), pos"
+    
+    def mark(self):
+        "..."
+        return "Mark(self.label, self.turn), pos1, pos2" 
+    
+
+class Player:
+    def __init__(self, playerType, board, label, turn):
+        if playerType == "cpu":
+            self.bot = Bot(board, label, turn)
+        else:
+            self.bot = None
+        self.board = board
+        self.label = label
+        self.turn = turn
+
+    def update(self, board, turn):
+        self.board = board
+        self.turn = turn
+
+    def valid(self, mark, move1, move2 = 0):
+        "..."
+        return True #(temp)
+
+    def collapse(self):
+        if self.bot:
+            return self.bot.collapse()
+        
+        self.board.show_board() #maybe just this? idk
+        if self.label == 'o':
+            l = 'x'
+        else:
+            l = 'o'
+        invalid = True
+        while invalid:
+            move = input("Collapse {}{}: ".format(l, self.turn-1))
+            invalid = not self.valid(Mark(l, self.turn-1), move)
+        return Mark(l, self.turn-1), int(move)
+    
+    def mark(self):
+        if self.bot:
+            return self.bot.mark()
+        
+        self.board.show_board()
+        invalid = True
+        while invalid:
+            move = input("Place {}{}: ".format(self.label, self.turn)).split()
+            if len(move) > 1:
+                invalid = not self.valid(Mark(self.label, self.turn), move[0], move[1])
+        return Mark(self.label, self.turn), int(move[0]), int(move[1])
+
+class Game:
+    def __init__(self, player1 = "human", player2 = "cpu"):
+        self.board = Board()
+        self.players = [Player(player1, self.board, 'x', 0), Player(player2, self.board, 'o', 0)]
+        self.turn = 0
+    
+    def game_over(self):
+        "check whether a player has won/the game is drawn"
+        return False
+
+    def score(self):
+        "..."
+        return "The game ended in a draw/player X/player O victory with score __-__"
+
+    def run(self):
+        for turn in range(self.turn, 9):
+            if self.game_over():
+                break
+            self.players[turn%2].update(self.board, turn+1)
+            if self.board.should_collapse():
+                move = self.players[turn%2].collapse()
+                self.board.collapse(move[0], move[1])
+                self.players[turn%2].update(self.board, turn+1)
+            move = self.players[turn%2].mark()
+            self.board.inscribe(move[0], move[1], move[2])
+        self.board.show_board()
+        print("Game over: " + self.score())
 
 if __name__ == '__main__':
     b = Board()
@@ -111,3 +202,6 @@ if __name__ == '__main__':
     print(b.should_collapse())
     b.show_entanglement()
     b.show_board()
+
+    game = Game("human", "human")
+    game.run()
