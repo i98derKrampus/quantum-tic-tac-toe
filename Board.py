@@ -125,6 +125,8 @@ class Player:
     def update(self, board, turn):
         self.board = board
         self.turn = turn
+        if self.bot:
+            self.bot.update(board,turn)
 
     def valid(self, mark, move1, move2 = 0):
         "..."
