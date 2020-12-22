@@ -19,6 +19,7 @@ class Board:
     def __init__(self):
         self.entanglement = nx.Graph()
         self.board = {k: [] for k in range(1, 10)}
+        self.collapsed = [False for k in range(10)]
 
     def _get_cycles(self):
         for cycle in list(nx.cycle_basis(self.entanglement)):
@@ -33,6 +34,12 @@ class Board:
 
     def should_collapse(self):
         return not not self._get_cycles()  # False if cycle list is empty
+    
+    def is_collapsed(self, *args):
+        c = True
+        for arg in args:
+            c = c and self.collapsed[arg]
+        return c
 
     def collapse(self, mark: Mark, pos_key: int):  # choose fate for first element in cycle
         self.board[pos_key] = [mark]
@@ -47,6 +54,8 @@ class Board:
 
             node1, node2 = neighbours[0]
             edge_mark = self.entanglement.get_edge_data(node1, node2)['mark']
+
+            self.collapsed[pos_key] = True
 
             self.entanglement.remove_edge(node1, node2)
 
@@ -129,8 +138,27 @@ class Player:
             self.bot.update(board,turn)
 
     def valid(self, mark, move1, move2 = 0):
-        "..."
-        return True #(temp)
+        if not move1.isdigit(): return False
+        if move2 != 0 and not move2.isdigit(): return False
+        move1, move2 = int(move1), int(move2)
+        if move1 < 1 or move2 < 0 or move1 > 9 or move2 > 9:
+            return False
+        #mark
+        if move2 != 0 and move1 != move2:
+            return not (self.board.is_collapsed(move1) or self.board.is_collapsed(move2))
+        if move1 == move2 and mark.turn != 9:
+            return False
+        if move1 == move2:
+            l = [i for i in range(1,move1)] + [j for j in range(move1+1,10)]
+            return self.board.is_collapsed(*l)
+        #collapse (with assumption there actually is a cycle)
+        if move1 not in self.board.board:
+            return False
+        if self.board.is_collapsed(move1):
+            return False
+        if mark not in self.board.board[move1]:
+            return False
+        return True
 
     def collapse(self):
         if self.bot:
@@ -166,12 +194,32 @@ class Game:
         self.turn = 0
     
     def game_over(self):
-        "check whether a player has won/the game is drawn"
-        return False
+        return self.score()[0] != 0
 
     def score(self):
-        "..."
-        return "The game ended in a draw/player X/player O victory with score __-__"
+        three = [False, False] #three in a row for player 1, 2
+        maxs = [10, 10]
+        poss = [(1,2,3),(4,5,6),(7,8,9),(1,4,7),(2,5,8),(3,6,9),(1,5,9),(3,5,7)]
+        for i in poss:
+            if self.board.is_collapsed(*i):
+                if self.board.board[i[0]][0].label == self.board.board[i[1]][0].label and self.board.board[i[0]][0].label == self.board.board[i[2]][0].label:
+                    if self.board.board[i[0]][0].label == "x":
+                        maxs[0] = max([self.board.board[k][0].turn for k in i])
+                        three[0] = True
+                    else:
+                        maxs[1] = max([self.board.board[k][0].turn for k in i])
+                        three[1] = True
+        if not (three[0] or three[1]):
+            score = (0,0)
+        elif three[0] and not three[1]:
+            score = (1,0)
+        elif three[1] and not three[0]:
+            score = (0,1)
+        elif maxs[0] < maxs[1]:
+            score = (1, 0.5)
+        else:
+            score = (0.5, 1)
+        return score[0]-score[1], "The game ended with score {}-{}".format(*score)
 
     def run(self):
         cycle2 = False
@@ -183,14 +231,14 @@ class Game:
                 move = self.players[turn%2].collapse()
                 self.board.collapse(move[0], move[1])
                 self.players[turn%2].update(self.board, turn+1)
-            if turn == 9: #last move was collapsing everything
+            if turn == 9 or self.game_over(): #game ended with collapse
                 break
             move = self.players[turn%2].mark()
             cycle2 = self.board.entanglement.has_edge(move[1],move[2])
-            self.board.inscribe(move[0], move[1], move[2])
+            self.board.inscribe(*move)
 
         self.board.show_board()
-        print("Game over: " + self.score())
+        print("Game over: " + self.score()[1])
 
 if __name__ == '__main__':
     b = Board()
