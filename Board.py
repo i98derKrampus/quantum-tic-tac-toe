@@ -175,7 +175,7 @@ class Game:
 
     def run(self):
         cycle2 = False
-        for turn in range(self.turn, 9):
+        for turn in range(self.turn, 10):
             if self.game_over():
                 break
             self.players[turn%2].update(self.board, turn+1)
@@ -183,6 +183,8 @@ class Game:
                 move = self.players[turn%2].collapse()
                 self.board.collapse(move[0], move[1])
                 self.players[turn%2].update(self.board, turn+1)
+            if turn == 9: #last move was collapsing everything
+                break
             move = self.players[turn%2].mark()
             cycle2 = self.board.entanglement.has_edge(move[1],move[2])
             self.board.inscribe(move[0], move[1], move[2])
