@@ -43,6 +43,7 @@ class Board:
 
     def collapse(self, mark: Mark, pos_key: int):  # choose fate for first element in cycle
         self.board[pos_key] = [mark]
+        self.collapsed[pos_key] = True
 
         if not self.entanglement.edges(pos_key):
             return
@@ -54,8 +55,6 @@ class Board:
 
             node1, node2 = neighbours[0]
             edge_mark = self.entanglement.get_edge_data(node1, node2)['mark']
-
-            self.collapsed[pos_key] = True
 
             self.entanglement.remove_edge(node1, node2)
 
