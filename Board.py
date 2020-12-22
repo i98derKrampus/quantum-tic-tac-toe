@@ -174,16 +174,19 @@ class Game:
         return "The game ended in a draw/player X/player O victory with score __-__"
 
     def run(self):
+        cycle2 = False
         for turn in range(self.turn, 9):
             if self.game_over():
                 break
             self.players[turn%2].update(self.board, turn+1)
-            if self.board.should_collapse():
+            if cycle2 or self.board.should_collapse():
                 move = self.players[turn%2].collapse()
                 self.board.collapse(move[0], move[1])
                 self.players[turn%2].update(self.board, turn+1)
             move = self.players[turn%2].mark()
+            cycle2 = self.board.entanglement.has_edge(move[1],move[2])
             self.board.inscribe(move[0], move[1], move[2])
+
         self.board.show_board()
         print("Game over: " + self.score())
 
@@ -197,12 +200,12 @@ if __name__ == '__main__':
     b.inscribe(Mark('x', 5), 3, 4)
 
     print(b.should_collapse())
-    b.show_entanglement()
+    #b.show_entanglement()
     b.show_board()
 
     b.collapse(Mark('x', 3), 2)
     print(b.should_collapse())
-    b.show_entanglement()
+    #b.show_entanglement()
     b.show_board()
 
     game = Game("human", "human")
