@@ -114,12 +114,12 @@ class Board:
                 print('\n')
 
 
-class Player(Board):
+class Player:
     def __init__(self, player_type, board, label, turn):
         self.label = label
         self.player_type = player_type
-
-        super(Player, self).__init__()
+        self.board = Game.board
+        self.turn = Game.turn
 
     def valid(self, mark, pos_key1, pos_key2=None):
         """
@@ -146,8 +146,8 @@ class Player(Board):
             return False
 
         # the board shouldn't be collapsed at the specified position keys
-        if self.is_collapsed(pos_key1) or \
-                (turn_mark and pos_key1 != pos_key2 and self.is_collapsed(pos_key2)):
+        if self.board.is_collapsed(pos_key1) or \
+                (turn_mark and pos_key1 != pos_key2 and self.board.is_collapsed(pos_key2)):
             return False
 
         if turn_mark:
@@ -157,7 +157,7 @@ class Player(Board):
 
                 indices = list(range(1, 10))
                 indices.remove(pos_key1)
-                return self.is_collapsed(*indices)
+                return self.board.is_collapsed(*indices)
 
         else:  # collapse (with assumption there actually is a cycle)
             """
@@ -165,10 +165,10 @@ class Player(Board):
                     (1) there is a mark at the specified position key
                     (2) the mark selected for inscription to that position is present in ghost marks 
             """
-            return pos_key1 in self.board and mark in self.board[pos_key1]
+            return pos_key1 in self.board.board and mark in self.board.board[pos_key1]
 
     def play_collapse(self):
-        self.show_board()  # maybe just this? idk
+        self.board.show_board()  # maybe just this? idk
         label = 'x' if self.label == 'o' else 'o'
 
         invalid = True
@@ -179,7 +179,7 @@ class Player(Board):
         return Mark(label, self.turn - 1), int(move)
 
     def play_mark(self):
-        self.show_board()
+        self.board.show_board()
 
         invalid = True
         while invalid:
@@ -208,11 +208,12 @@ class Bot(Player):
         return "Mark(self.label, self.turn), pos1, pos2"
 
 
-class Game(Board):
+class Game:
+    board = Board()
+    turn = 0
+
     def __init__(self, player1="human", player2="cpu"):
         self.players = [Player(player1, self.board, 'x', 0), Player(player2, self.board, 'o', 0)]
-        self.turn = 0
-        super(Game, self).__init__()
 
     def game_over(self):
         return self.score()[0]
@@ -225,17 +226,17 @@ class Game(Board):
                   (1, 4, 7), (2, 5, 8), (3, 6, 9),
                   (1, 5, 9), (3, 5, 7)]:
 
-            if self.is_collapsed(*i):
-                mark1 = self.board[i[0]][0]
-                mark2 = self.board[i[1]][0]
-                mark3 = self.board[i[2]][0]
+            if self.board.is_collapsed(*i):
+                mark1 = self.board.board[i[0]][0]
+                mark2 = self.board.board[i[1]][0]
+                mark3 = self.board.board[i[2]][0]
 
                 if all(x.label == mark1.label for x in [mark1, mark2, mark3]):
                     if mark1.label == "x":
-                        maxs[0] = max([self.board[k][0].turn for k in i])
+                        maxs[0] = max([self.board.board[k][0].turn for k in i])
                         three[0] = True
                     else:
-                        maxs[1] = max([self.board[k][0].turn for k in i])
+                        maxs[1] = max([self.board.board[k][0].turn for k in i])
                         three[1] = True
 
         if not any(three):
@@ -255,17 +256,17 @@ class Game(Board):
             if self.game_over():
                 break
 
-            if self.should_collapse:
+            if self.board.should_collapse:
                 move = self.players[turn % 2].play_collapse()
-                self.collapse(move[0], move[1])
+                self.board.collapse(move[0], move[1])
 
             if turn == 9 or self.game_over():  # game ended with collapse
                 break
 
             move = self.players[turn % 2].play_mark()
-            self.inscribe(*move)
+            self.board.inscribe(*move)
 
-        self.show_board()
+        self.board.show_board()
         print("Game over: " + self.score()[1])
 
 
