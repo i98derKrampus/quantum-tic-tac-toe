@@ -251,43 +251,18 @@ class Game(Board):
         return score[0] == score[1], "The game ended with score {}-{}".format(*score)
 
     def run(self):
-        cycle2 = False
-
         for turn in range(self.turn, 10):
             if self.game_over():
                 break
 
-            if cycle2 or self.should_collapse:
+            if self.should_collapse:
                 move = self.players[turn % 2].play_collapse()
                 self.collapse(move[0], move[1])
 
             if turn == 9 or self.game_over():  # game ended with collapse
                 break
 
-        m = None
-        for turn in range(self.turn, 10):
-            if self.game_over():
-                break
-
-            if cycle2 or self.should_collapse:
-                move = self.players[turn % 2].play_collapse()
-                self.collapse(move[0], move[1])
-                if cycle2:
-                    if move[1] == m[1]:
-                        self.board.board[m[2]][0] = m[0]
-                    else:
-                        self.board.board[m[1]][0] = m[0]
-                self.players[turn%2].update(self.board, turn+1)
-            if turn == 9 or self.game_over(): #game ended with collapse
-                break
-            move = self.players[turn%2].mark()
-            cycle2 = self.board.entanglement.has_edge(move[1],move[2])
-            if cycle2:
-                m = [self.board.entanglement.get_edge_data(move[1], move[2])['mark'], move[1], move[2]]
-            self.board.inscribe(*move)
-
             move = self.players[turn % 2].play_mark()
-            cycle2 = self.entanglement.has_edge(move[1], move[2])
             self.inscribe(*move)
 
         self.show_board()
