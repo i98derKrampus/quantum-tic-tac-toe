@@ -142,7 +142,7 @@ class Player:
         pos_key1, pos_key2 = int(pos_key1), pos_key2 and int(pos_key2)
 
         #  position keys should be in {1, ..., 9}
-        if pos_key1 < 1 or pos_key1 > 9 or (turn_mark and pos_key2 < 1 or pos_key2 > 9):
+        if pos_key1 < 1 or pos_key1 > 9 or (turn_mark and (pos_key2 < 1 or pos_key2 > 9)):
             return False
 
         # the board shouldn't be collapsed at the specified position keys
@@ -158,7 +158,8 @@ class Player:
                 indices = list(range(1, 10))
                 indices.remove(pos_key1)
                 return self.board.is_collapsed(*indices)
-
+            else:
+                return True
         else:  # collapse (with assumption there actually is a cycle)
             """
                check for:
@@ -168,22 +169,24 @@ class Player:
             return pos_key1 in self.board.board and mark in self.board.board[pos_key1]
 
     def play_collapse(self):
+        self.turn = Game.turn
         self.board.show_board()  # maybe just this? idk
         label = 'x' if self.label == 'o' else 'o'
 
         invalid = True
         while invalid:
-            move = input(f"Collapse {label}{self.turn - 1}: ")
+            move = input(f"Collapse {label}{self.turn - 1}: \n")
             invalid = not self.valid(Mark(label, self.turn - 1), move)
 
         return Mark(label, self.turn - 1), int(move)
 
     def play_mark(self):
+        self.turn = Game.turn
         self.board.show_board()
 
         invalid = True
         while invalid:
-            move = input(f"Place {self.label}{self.turn}: ").split()
+            move = input(f"Place {self.label}{self.turn}: \n").split()
 
             if len(move) > 1:
                 invalid = not self.valid(Mark(self.label, self.turn), move[0], move[1])
@@ -216,7 +219,7 @@ class Game:
         self.players = [Player(player1, self.board, 'x', 0), Player(player2, self.board, 'o', 0)]
 
     def game_over(self):
-        return self.score()[0]
+        return self.score()[0] != 0
 
     def score(self):
         three = [False, False]  # three in a row for player 1, 2
@@ -249,10 +252,11 @@ class Game:
             score = (1, 0.5)
         else:
             score = (0.5, 1)
-        return score[0] == score[1], "The game ended with score {}-{}".format(*score)
+        return score[0] - score[1], "The game ended with score {}-{}".format(*score)
 
     def run(self):
         for turn in range(self.turn, 10):
+            Game.turn += 1
             if self.game_over():
                 break
 
@@ -271,7 +275,7 @@ class Game:
 
 
 if __name__ == '__main__':
-    b = Board()
+    #b = Board()
 
     #b.inscribe(Mark('x', 1), 1, 3)
     #b.inscribe(Mark('o', 2), 2, 3)
@@ -279,14 +283,14 @@ if __name__ == '__main__':
     #b.inscribe(Mark('o', 4), 4, 5)
     #b.inscribe(Mark('x', 5), 3, 4)
 
-    print(b.should_collapse)
+    #print(b.should_collapse)
     # b.show_entanglement()
-    b.show_board()
+    #b.show_board()
 
-    b.collapse(Mark('x', 3), 2)
-    print(b.should_collapse)
+    #b.collapse(Mark('x', 3), 2)
+    #print(b.should_collapse)
     # b.show_entanglement()
-    b.show_board()
+    #b.show_board()
 
     #print(b.should_collapse())
     #b.show_entanglement()
