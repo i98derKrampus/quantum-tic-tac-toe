@@ -13,6 +13,9 @@ class Mark:
 
     def __eq__(self, other):
         return self.label == other.label and self.turn == other.turn
+    
+    def __repr__(self):
+        return "Mark({},{})".format(self.label,self.turn)
 
 
 class Board:
@@ -249,6 +252,7 @@ class Game(Board):
 
     def run(self):
         cycle2 = False
+<<<<<<< HEAD
 
         for turn in range(self.turn, 10):
             if self.game_over():
@@ -260,6 +264,29 @@ class Game(Board):
 
             if turn == 9 or self.game_over():  # game ended with collapse
                 break
+=======
+        m = None
+        for turn in range(self.turn, 10):
+            if self.game_over():
+                break
+            self.players[turn%2].update(self.board, turn+1)
+            if cycle2 or self.board.should_collapse():
+                move = self.players[turn%2].collapse()
+                self.board.collapse(move[0], move[1])
+                if cycle2:
+                    if move[1] == m[1]:
+                        self.board.board[m[2]][0] = m[0]
+                    else:
+                        self.board.board[m[1]][0] = m[0]
+                self.players[turn%2].update(self.board, turn+1)
+            if turn == 9 or self.game_over(): #game ended with collapse
+                break
+            move = self.players[turn%2].mark()
+            cycle2 = self.board.entanglement.has_edge(move[1],move[2])
+            if cycle2:
+                m = [self.board.entanglement.get_edge_data(move[1], move[2])['mark'], move[1], move[2]]
+            self.board.inscribe(*move)
+>>>>>>> 462f63549b1136d4f1c1557a45544f10209cbd1f
 
             move = self.players[turn % 2].play_mark()
             cycle2 = self.entanglement.has_edge(move[1], move[2])
@@ -270,14 +297,15 @@ class Game(Board):
 
 
 if __name__ == '__main__':
-    b = Board()
+    #b = Board()
 
-    b.inscribe(Mark('x', 1), 1, 3)
-    b.inscribe(Mark('o', 2), 2, 3)
-    b.inscribe(Mark('x', 3), 2, 4)
-    b.inscribe(Mark('o', 4), 4, 5)
-    b.inscribe(Mark('x', 5), 3, 4)
+    #b.inscribe(Mark('x', 1), 1, 3)
+    #b.inscribe(Mark('o', 2), 2, 3)
+    #b.inscribe(Mark('x', 3), 2, 4)
+    #b.inscribe(Mark('o', 4), 4, 5)
+    #b.inscribe(Mark('x', 5), 3, 4)
 
+<<<<<<< HEAD
     print(b.should_collapse)
     # b.show_entanglement()
     b.show_board()
@@ -286,6 +314,16 @@ if __name__ == '__main__':
     print(b.should_collapse)
     # b.show_entanglement()
     b.show_board()
+=======
+    #print(b.should_collapse())
+    #b.show_entanglement()
+    #b.show_board()
+
+    #b.collapse(Mark('x', 3), 2)
+    #print(b.should_collapse())
+    #b.show_entanglement()
+    #b.show_board()
+>>>>>>> 462f63549b1136d4f1c1557a45544f10209cbd1f
 
     game = Game("human", "human")
     game.run()
