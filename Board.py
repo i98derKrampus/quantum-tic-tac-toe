@@ -268,10 +268,10 @@ class Game(Board):
         for turn in range(self.turn, 10):
             if self.game_over():
                 break
-            self.players[turn%2].update(self.board, turn+1)
-            if cycle2 or self.board.should_collapse():
-                move = self.players[turn%2].collapse()
-                self.board.collapse(move[0], move[1])
+
+            if cycle2 or self.should_collapse:
+                move = self.players[turn % 2].play_collapse()
+                self.collapse(move[0], move[1])
                 if cycle2:
                     if move[1] == m[1]:
                         self.board.board[m[2]][0] = m[0]
