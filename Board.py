@@ -252,7 +252,6 @@ class Game(Board):
 
     def run(self):
         cycle2 = False
-<<<<<<< HEAD
 
         for turn in range(self.turn, 10):
             if self.game_over():
@@ -264,7 +263,7 @@ class Game(Board):
 
             if turn == 9 or self.game_over():  # game ended with collapse
                 break
-=======
+
         m = None
         for turn in range(self.turn, 10):
             if self.game_over():
@@ -286,7 +285,6 @@ class Game(Board):
             if cycle2:
                 m = [self.board.entanglement.get_edge_data(move[1], move[2])['mark'], move[1], move[2]]
             self.board.inscribe(*move)
->>>>>>> 462f63549b1136d4f1c1557a45544f10209cbd1f
 
             move = self.players[turn % 2].play_mark()
             cycle2 = self.entanglement.has_edge(move[1], move[2])
@@ -297,7 +295,7 @@ class Game(Board):
 
 
 if __name__ == '__main__':
-    #b = Board()
+    b = Board()
 
     #b.inscribe(Mark('x', 1), 1, 3)
     #b.inscribe(Mark('o', 2), 2, 3)
@@ -305,7 +303,6 @@ if __name__ == '__main__':
     #b.inscribe(Mark('o', 4), 4, 5)
     #b.inscribe(Mark('x', 5), 3, 4)
 
-<<<<<<< HEAD
     print(b.should_collapse)
     # b.show_entanglement()
     b.show_board()
@@ -314,7 +311,7 @@ if __name__ == '__main__':
     print(b.should_collapse)
     # b.show_entanglement()
     b.show_board()
-=======
+
     #print(b.should_collapse())
     #b.show_entanglement()
     #b.show_board()
@@ -323,7 +320,6 @@ if __name__ == '__main__':
     #print(b.should_collapse())
     #b.show_entanglement()
     #b.show_board()
->>>>>>> 462f63549b1136d4f1c1557a45544f10209cbd1f
 
     game = Game("human", "human")
     game.run()
