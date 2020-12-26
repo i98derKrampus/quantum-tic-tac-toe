@@ -204,10 +204,7 @@ class Board:
     def show_board(self):
         for i in range(1, 10):
             for m in self.board[i]:
-                print(f"{m.label}{m.turn}", end=" ")
-            print('\t\t', end=" ")
-
+                print(f" {m.label}{m.turn}", end=" ")
+            print('\t|',end='')
             if not i % 3:
                 print('\n')
-
-
