@@ -202,9 +202,16 @@ class Board:
         plt.show()
 
     def show_board(self):
-        for i in range(1, 10):
-            for m in self.board[i]:
-                print(f" {m.label}{m.turn}", end=" ")
-            print('\t|',end='')
-            if not i % 3:
-                print('\n')
+        for i in range(9):
+            if not i%3:
+                print("$"*50)
+            row = "$$"
+
+            for j in range(1, 4):
+                field = ""
+                for m in self.board[i//3*3+j][3*(i%3):3*(i%3+1)]:
+                    field += f"{m.label}{m.turn} "
+                field = field[:-1].center(14) + "$$"
+                row += field
+            print(row)
+        print("$"*50)
