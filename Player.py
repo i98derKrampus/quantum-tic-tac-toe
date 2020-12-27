@@ -38,6 +38,7 @@ class Bot(Player):
     def __init__(self, game, label):
         super().__init__("cpu", game, label)
         self.__minimax_board = game.copy()
+        self.cpy_time = 0
 
     def play_collapse(self):
         last_move = self.game.moves[-1]
@@ -60,17 +61,18 @@ class Bot(Player):
         score = -3 if is_max else 3
         mark, pos1, pos2 = last_move
         positions = [pos1, pos2]
-        temp_board = self.__minimax_board.copy()
         for p in positions:
+            move_list = []
+            if self.__minimax_board.cycle2:
+                move_list.append(last_move)
             candidate_move = (mark, p)
-            self.__minimax_board.collapse(mark, p)
+            self.__minimax_board.collapse(mark, p, move_list)
             if is_max:
                 candidate_score, _ = self.__minimax_mark(alpha, beta, is_max)
                 if score < candidate_score:
                     score = candidate_score
                     return_move = candidate_move
-
-                self.__minimax_board = temp_board.copy()
+                self.__minimax_board.undo_collapse(p, move_list)
                 if score >= beta:
                     return score, return_move
                 alpha = max(score, alpha)
@@ -80,8 +82,7 @@ class Bot(Player):
                 if score > candidate_score:
                     score = candidate_score
                     return_move = candidate_move
-
-                self.__minimax_board = temp_board.copy()
+                self.__minimax_board.undo_collapse(p, move_list)
                 if score <= alpha:
                     return score, return_move
 
@@ -98,15 +99,6 @@ class Bot(Player):
         score = -3 if is_max else 3
         seen = set()
         for i in [1, 3, 7, 9]:
-            for j in [1, 3, 7, 9]:
-                if (i, j) in seen: continue
-                score, alpha, beta, return_move = self.__expand(i, j, alpha, beta, is_max, label, score, return_move,
-                                                                seen)
-                if is_max and score >= beta:
-                    return score, return_move
-                elif not is_max and score <= alpha:
-                    return score, return_move
-
             j = 5
             if (i, j) in seen: continue
             score, alpha, beta, return_move = self.__expand(i, j, alpha, beta, is_max, label, score, return_move,
@@ -115,6 +107,15 @@ class Bot(Player):
                 return score, return_move
             elif not is_max and score <= alpha:
                 return score, return_move
+
+            for j in [1, 3, 7, 9]:
+                if (i, j) in seen: continue
+                score, alpha, beta, return_move = self.__expand(i, j, alpha, beta, is_max, label, score, return_move,
+                                                                seen)
+                if is_max and score >= beta:
+                    return score, return_move
+                elif not is_max and score <= alpha:
+                    return score, return_move
 
             for j in [2, 4, 6, 8]:
                 if (i, j) in seen: continue
@@ -158,7 +159,6 @@ class Bot(Player):
         if self.__minimax_board.valid(Mark(self.label, self.__minimax_board.turn), str(pos1), str(pos2)):
             seen.add((pos1, pos2))
             seen.add((pos2, pos1))
-            temp_board = self.__minimax_board.copy()
             self.__minimax_board.inscribe(Mark(label, self.__minimax_board.turn), pos1, pos2)
             candidate_move = (Mark(label, self.__minimax_board.turn), pos1, pos2)
             self.__minimax_board.turn += 1
@@ -173,7 +173,7 @@ class Bot(Player):
                     if score < candidate_score:
                         score, return_move = candidate_score, candidate_move
 
-                self.__minimax_board = temp_board.copy()
+                self.__minimax_board.undo_move(candidate_move)
                 if score >= beta:
                     return score, alpha, beta, return_move
 
@@ -189,7 +189,7 @@ class Bot(Player):
                     if score > candidate_score:
                         score, return_move = candidate_score, candidate_move
 
-                self.__minimax_board = temp_board.copy()
+                self.__minimax_board.undo_move(candidate_move)
                 if score <= alpha:
                     return score, alpha, beta, return_move
                 beta = min(beta, score)

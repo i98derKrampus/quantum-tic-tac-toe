@@ -28,8 +28,8 @@ class Board:
         self.collapsed = [False for k in range(10)]
         self.should_collapse = False
         self.collapse_at = None
-
         self.turn = 0
+        self.cycle2 = False
 
     def _get_cycles(self):
         for cycle in list(nx.cycle_basis(self.entanglement)):
@@ -45,9 +45,12 @@ class Board:
     def is_collapsed(self, *args):
         return all([self.collapsed[arg] for arg in args])
 
-    def collapse(self, mark: Mark, pos_key: int):  # choose fate for first element in cycle
+    def collapse(self, mark: Mark, pos_key: int, move_list: list):  # choose fate for first element in cycle
         self.board[pos_key] = [mark]
         self.collapsed[pos_key] = True
+
+        if self.cycle2:
+            self.cycle2 = False
 
         if not self.entanglement.edges(pos_key):
             return
@@ -59,10 +62,11 @@ class Board:
 
             node1, node2 = neighbours[0]
             edge_mark = self.entanglement.get_edge_data(node1, node2)['mark']
+            move_list.append((edge_mark, node1, node2))
 
             self.entanglement.remove_edge(node1, node2)
 
-            self.collapse(edge_mark, node2)
+            self.collapse(edge_mark, node2, move_list)
 
     def inscribe(self, mark: Mark, pos_key1: int, pos_key2: int):
         self.board[pos_key1].append(mark)
@@ -71,6 +75,7 @@ class Board:
         if self.entanglement.has_edge(pos_key1, pos_key2):
             self.should_collapse = True
             self.collapse_at = pos_key1
+            self.cycle2 = True
             return
 
         self.entanglement.add_edge(pos_key1, pos_key2, mark=mark)
@@ -163,6 +168,41 @@ class Board:
                     (2) the mark selected for inscription to that position is present in ghost marks 
             """
             return pos_key1 in self.board and mark in self.board[pos_key1]
+
+    def undo_move(self, move):
+        mark, pos1, pos2 = move
+        self.turn -= 1
+        if not self.cycle2:
+            self.entanglement.remove_edge(pos1, pos2)
+        else:
+            self.cycle2 = False
+        self.board[pos1].remove(mark)
+        self.board[pos2].remove(mark)
+        self.should_collapse = False
+        self.collapse_at = None
+
+    def undo_collapse(self, collapse_pos: int, move_list: list):
+        self.board[collapse_pos] = []
+        self.collapsed[collapse_pos] = False
+        move_list.reverse()
+        for move in move_list:
+            mark, pos1, pos2 = move
+
+            if self.entanglement.has_edge(pos1, pos2):
+                self.cycle2 = True
+                self.board[pos1].append(mark)
+                self.board[pos2].append(mark)
+                continue
+
+            self.entanglement.add_edge(pos1, pos2, mark=mark)
+            if self.collapsed[pos1]:
+                self.board[pos1] = []
+                self.collapsed[pos1] = False
+            if self.collapsed[pos2]:
+                self.board[pos2] = []
+                self.collapsed[pos2] = False
+            self.board[pos1].append(mark)
+            self.board[pos2].append(mark)
 
     def copy(self):
         new_board = Board()

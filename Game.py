@@ -22,7 +22,7 @@ class Game(Board):
                 move = self.players[turn % 2].play_collapse()
                 print(f'Player {self.players[turn % 2].label} collapsed {move} in turn {self.turn}\n')
                 self.moves.append(move)
-                self.collapse(move[0], move[1])
+                self.collapse(move[0], move[1], [])
 
             if turn == 9 or self.game_over():  # game ended with collapse
                 break
@@ -39,11 +39,13 @@ class Game(Board):
 
 if __name__ == '__main__':
     new_game = Game("cpu", "cpu")
-    new_game.inscribe(Mark('x', 1), 9, 1)
-    new_game.inscribe(Mark('o', 2), 1, 5)
-    new_game.turn = 2
-    new_game.moves.append((Mark('x', 1), 9, 1))
-    new_game.moves.append((Mark('o', 2), 1, 5))
     start_time = time.time()
+    new_game.inscribe(Mark('x', 1), 1, 3)
+    new_game.inscribe(Mark('o', 2), 3, 2)
+    new_game.moves.append((Mark('x', 1), 1, 3))
+    new_game.moves.append((Mark('o', 2), 3, 2))
+    new_game.turn += 1
+    new_game.turn += 1
+
     new_game.run()
     print(f'--------{time.time() - start_time} seconds ----------')
