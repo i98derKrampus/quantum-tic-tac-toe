@@ -42,12 +42,12 @@ class Bot(Player):
     def play_collapse(self):
         last_move = self.game.moves[-1]
         self.__minimax_board = self.game.copy()
-        alpha, beta = -2, 2
+        alpha, beta = -3, 3
         score, move = self.__minimax_collapse(alpha, beta, last_move, self.label == 'x')
         return move
 
     def play_mark(self):
-        alpha, beta = -2, 2
+        alpha, beta = -3, 3
         self.__minimax_board = self.game.copy()
         score, move = self.__minimax_mark(alpha, beta, self.label == 'x')
         return move
@@ -57,7 +57,7 @@ class Bot(Player):
         if self.terminal_test():
             return self.__minimax_board.score()[0], return_move
 
-        score = -3 if is_max else 3
+        score = -4 if is_max else 4
         mark, pos1, pos2 = last_move
         positions = [pos1, pos2]
         temp_board = self.__minimax_board.copy()
@@ -95,7 +95,7 @@ class Bot(Player):
         if self.terminal_test():
             return self.__minimax_board.score()[0], return_move
 
-        score = -3 if is_max else 3
+        score = -4 if is_max else 4
         seen = set()
         for i in [1, 3, 7, 9]:
             for j in [1, 3, 7, 9]:

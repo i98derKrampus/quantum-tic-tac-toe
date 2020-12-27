@@ -40,10 +40,12 @@ class Game(Board):
 if __name__ == '__main__':
     new_game = Game("cpu", "cpu")
     new_game.inscribe(Mark('x', 1), 9, 1)
-    new_game.inscribe(Mark('o', 2), 1, 5)
-    new_game.turn = 2
+    new_game.inscribe(Mark('o', 2), 3, 7)
+    new_game.inscribe(Mark('x', 3), 3, 7)
+    new_game.turn = 3
     new_game.moves.append((Mark('x', 1), 9, 1))
-    new_game.moves.append((Mark('o', 2), 1, 5))
+    new_game.moves.append((Mark('o', 2), 3, 7))
+    new_game.moves.append((Mark('x', 3), 3, 7))
     start_time = time.time()
     new_game.run()
     print(f'--------{time.time() - start_time} seconds ----------')

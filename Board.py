@@ -85,9 +85,9 @@ class Board:
         if not any(three):
             score = (0, 0)
         elif three[0] and not three[1]:
-            score = (1, 0)
+            score = (three[0], 0)
         elif three[1] and not three[0]:
-            score = (0, 1)
+            score = (0, three[1])
         elif maxs[0] < maxs[1]:
             score = (1, 0.5)
         else:
@@ -95,7 +95,7 @@ class Board:
         return score[0] - score[1], "The game ended with score {}-{}".format(*score)
 
     def three_in_a_row(self):
-        three = [False, False]  # three in a row for player 1, 2
+        three = [0, 0]  # three in a row for player 1, 2
         maxs = [10, 10]
 
         for i in [(1, 2, 3), (4, 5, 6), (7, 8, 9),
@@ -110,10 +110,10 @@ class Board:
                 if all(x.label == mark1.label for x in [mark1, mark2, mark3]):
                     if mark1.label == "x":
                         maxs[0] = max([self.board[k][0].turn for k in i])
-                        three[0] = True
+                        three[0] += 1
                     else:
                         maxs[1] = max([self.board[k][0].turn for k in i])
-                        three[1] = True
+                        three[1] += 1
 
         return three, maxs
 
