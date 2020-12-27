@@ -125,6 +125,14 @@ class Bot(Player):
                 elif not is_max and score <= alpha:
                     return score, return_move
         i = 5
+        j = 5
+        if (i, j) not in seen:
+            score, alpha, beta, return_move = self.__expand(i, j, alpha, beta, is_max, label, score, return_move, seen)
+            if is_max and score >= beta:
+                return score, return_move
+            elif not is_max and score <= alpha:
+                return score, return_move
+
         for j in [2, 4, 6, 8]:
             if (i, j) in seen: continue
             score, alpha, beta, return_move = self.__expand(i, j, alpha, beta, is_max, label, score, return_move, seen)
