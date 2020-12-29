@@ -26,9 +26,10 @@ class Board:
         self.board = {k: [] for k in range(1, 10)}
 
         self.collapsed = [False for k in range(10)]
+        self.moves = []
         self.should_collapse = False
         self.collapse_at = None
-        self.turn = 0
+        self.turn = 1
         self.cycle2 = False
 
     def _get_cycles(self):
@@ -41,6 +42,34 @@ class Board:
                 )
                 for node1, node2 in zip(cycle, (*cycle[1:], cycle[0]))
             ]
+
+    def make_move(self, move):
+        if self.should_collapse:
+            mark, pos = move
+            self.collapse(mark, pos, [])
+            self.should_collapse = False
+        else:
+            mark, pos1, pos2 = move
+            self.inscribe(mark, pos1, pos2)
+            self.turn += 1
+        self.moves.append(move)
+
+    def all_moves(self, label):
+        move_list = []
+        if self.should_collapse:
+            mark, pos1, pos2 = self.moves[-1]
+            positions = [pos1, pos2]
+            for p in positions:
+                move_list.append((mark, p))
+        else:
+            seen = set()
+            for i in range(1, 10):
+                for j in range(1, 10):
+                    if (i, j) not in seen and self.valid(Mark(label, self.turn), str(i), str(j)):
+                        move_list.append((Mark(label, self.turn), i, j))
+                        seen.add((i, j))
+                        seen.add((j, i))
+        return move_list
 
     def is_collapsed(self, *args):
         return all([self.collapsed[arg] for arg in args])
@@ -86,7 +115,6 @@ class Board:
 
     def score(self):
         three, maxs = self.three_in_a_row()
-        score = (0, 0)
         if not any(three):
             score = (0, 0)
         elif three[0] and not three[1]:
@@ -121,6 +149,10 @@ class Board:
                         three[1] = True
 
         return three, maxs
+
+    def terminal_test(self):
+        score, _ = self.score()
+        return all(self.collapsed[1:]) or score != 0
 
     def valid(self, mark, pos_key1, pos_key2=None):
         """
@@ -209,9 +241,11 @@ class Board:
         new_board.board = deepcopy(self.board)
         new_board.entanglement = deepcopy(self.entanglement)
         new_board.collapsed = deepcopy(self.collapsed)
+        new_board.moves = deepcopy(self.moves)
         new_board.should_collapse = self.should_collapse
         new_board.collapse_at = self.collapse_at
         new_board.turn = self.turn
+        new_board.cycle2 = self.cycle2
         return new_board
 
     def show_entanglement(self):
