@@ -43,10 +43,10 @@ class Board:
                 for node1, node2 in zip(cycle, (*cycle[1:], cycle[0]))
             ]
 
-    def make_move(self, move):
+    def make_move(self, move, move_list):
         if self.should_collapse:
             mark, pos = move
-            self.collapse(mark, pos, [])
+            self.collapse(mark, pos, move_list)
             self.should_collapse = False
         else:
             mark, pos1, pos2 = move
@@ -63,8 +63,8 @@ class Board:
                 move_list.append((mark, p))
         else:
             seen = set()
-            for i in range(1, 10):
-                for j in range(1, 10):
+            for i in [1, 3, 5, 7, 9, 2, 4, 6, 8]:
+                for j in [1, 3, 5, 7, 9, 2, 4, 6, 8]:
                     if (i, j) not in seen and self.valid(Mark(label, self.turn), str(i), str(j)):
                         move_list.append((Mark(label, self.turn), i, j))
                         seen.add((i, j))
@@ -77,6 +77,7 @@ class Board:
     def collapse(self, mark: Mark, pos_key: int, move_list: list):  # choose fate for first element in cycle
         self.board[pos_key] = [mark]
         self.collapsed[pos_key] = True
+        self.should_collapse = False
 
         if self.cycle2:
             self.cycle2 = False
@@ -216,6 +217,7 @@ class Board:
     def undo_collapse(self, collapse_pos: int, move_list: list):
         self.board[collapse_pos] = []
         self.collapsed[collapse_pos] = False
+        self.should_collapse = True
         move_list.reverse()
         for move in move_list:
             mark, pos1, pos2 = move
