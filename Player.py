@@ -1,5 +1,6 @@
 from Board import *
 from MCSTPlayer import *
+import re
 
 
 class Player:
@@ -38,7 +39,6 @@ class Bot(Player):
     def __init__(self, game, label):
         super().__init__("cpu", game, label)
         self.__minimax_board = game.copy()
-        self.cpy_time = 0
 
     def play_collapse(self):
         last_move = self.game.moves[-1]
@@ -48,10 +48,18 @@ class Bot(Player):
         return move
 
     def play_mark(self):
+        if self.game.turn == 1:
+            return (Mark(self.label, self.game.turn), 1, 9)
+
+        if self.game.turn == 2:
+            mark, pos1, pos2 = self.game.moves[-1]
+            move_dict = self.__get_from_file()
+            npos1, npos2 = move_dict[(pos1, pos2)][0]
+            return (Mark(self.label, self.game.turn), npos1, npos2)
+
         alpha, beta = -2, 2
         self.__minimax_board = self.game.copy()
         score, move = self.__minimax_mark(alpha, beta, self.label == 'x')
-        print(score)
         return move
 
     def __minimax_collapse(self, alpha, beta, last_move, is_max):
@@ -60,6 +68,7 @@ class Bot(Player):
             return self.__minimax_board.score()[0], return_move
 
         score = -3 if is_max else 3
+
         mark, pos1, pos2 = last_move
 
         positions = [pos1, pos2]
@@ -84,9 +93,8 @@ class Bot(Player):
                     score, return_move = candidate_score, candidate_move
                 beta = min(score, beta)
 
-            if beta <= alpha:
+            if self.__cutoff(is_max, score, alpha, beta):
                 return score, return_move
-
         return score, return_move
 
     def __minimax_mark(self, alpha, beta, is_max):
@@ -124,7 +132,37 @@ class Bot(Player):
                             score, return_move = candidate_score, candidate_move
                         beta = min(beta, score)
 
-                    if alpha >= beta:
+                    if self.__cutoff(is_max, score, alpha, beta):
                         return score, return_move
 
         return score, return_move
+
+    def __cutoff(self, is_max, score, alpha, beta):
+        if alpha >= beta:
+            return True
+        elif (is_max and score == 1) or (not is_max and score == -1):
+            return True
+        return False
+
+    def __get_from_file(self):
+        lines = [x.strip() for x in open('assets/second_move_optimal').readlines()]
+        d = dict()
+        curr_key, rcurr_key = None, None
+        for line in lines:
+            x = line.split(',')
+            if x == ['']:
+                continue
+
+            ints = [int(x) for x in re.findall(r'\d+', line)]
+            if line.startswith('('):
+                curr_key = (ints[0], ints[1])
+                rcurr_key = (ints[1], ints[0])
+                d[curr_key], d[rcurr_key] = [], []
+            else:
+                d[curr_key].append((ints[0], ints[1]))
+                d[rcurr_key].append((ints[0], ints[1]))
+        return d
+
+
+if __name__ == '__main__':
+    pass
