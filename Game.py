@@ -67,7 +67,7 @@ class Game(Board):
                 move = self.players[turn % 2].play_collapse()
                 print(f'Player {self.players[turn % 2].label} collapsed {move} in turn {self.turn}\n')
                 self.moves.append(move)
-                self.collapse(move[0], move[1], [])
+                self.make_move(move, [])
 
             if turn == 9 or self.game_over():  # game ended with collapse
                 break
@@ -75,10 +75,9 @@ class Game(Board):
             move = self.players[turn % 2].play_mark()
             print(f'Player {self.players[turn % 2].label} played {move} in turn {self.turn}\n')
             self.moves.append(move)
-            self.inscribe(*move)
+            self.make_move(move, [])
             self.show_board()
 
-            self.turn += 1
 
         self.show_board()
         print("Game over: " + self.score()[1])
@@ -86,7 +85,4 @@ class Game(Board):
 
 
 if __name__ == '__main__':
-    new_game = Game("cpu", "cpu")
-    start_time = time.time()
-    new_game.run_mcst()
-    print(f'--------{time.time() - start_time} seconds ----------')
+    pass
