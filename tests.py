@@ -35,3 +35,6 @@ class TestMinimax(unittest.TestCase):
         g.make_move((Mark('x', 3), 3, 7), [])
         result = g.run_minimax()
         self.assertTrue(result == -1)
+
+if __name__ == '__main__':
+    unittest.main()
