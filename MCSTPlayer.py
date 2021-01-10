@@ -58,9 +58,3 @@ def update(new_node: GameNode, value: float):
         new_node.N += 1
         new_node.V += value
         new_node = new_node.parent
-
-
-if __name__ == '__main__':
-    g = GameTree('x')
-    move = search(g.root, 20, 1.8)
-    print(move)

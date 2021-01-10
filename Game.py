@@ -82,7 +82,3 @@ class Game(Board):
         self.show_board()
         print("Game over: " + self.score()[1])
         return self.score()[0]
-
-
-if __name__ == '__main__':
-    pass

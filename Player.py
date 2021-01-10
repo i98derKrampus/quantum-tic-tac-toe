@@ -1,5 +1,4 @@
 from Board import *
-from MCSTPlayer import *
 import re
 
 
@@ -146,6 +145,7 @@ class Bot(Player):
 
     def __get_from_file(self):
         lines = [x.strip() for x in open('assets/second_move_optimal').readlines()]
+
         d = dict()
         curr_key, rcurr_key = None, None
         for line in lines:
@@ -162,7 +162,3 @@ class Bot(Player):
                 d[curr_key].append((ints[0], ints[1]))
                 d[rcurr_key].append((ints[0], ints[1]))
         return d
-
-
-if __name__ == '__main__':
-    pass

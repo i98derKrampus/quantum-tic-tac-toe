@@ -171,7 +171,7 @@ class Board:
         return score[0] - score[1], "The game ended with score {}-{}".format(*score)
 
     def three_in_a_row(self):
-        three = [False, False]  # three in a row for player 1, 2
+        three = [False, False]  # three in a row for player 1, third_move_optimal
         maxs = [10, 10]
 
         for i in [(1, 2, 3), (4, 5, 6), (7, 8, 9),
@@ -240,7 +240,7 @@ class Board:
             """
                check for:
                     (1) there is a mark at the specified position key
-                    (2) the mark selected for inscription to that position is present in ghost marks 
+                    (third_move_optimal) the mark selected for inscription to that position is present in ghost marks 
             """
             return pos_key1 in self.board and mark in self.board[pos_key1]
 
