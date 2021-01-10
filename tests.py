@@ -14,9 +14,6 @@ class TestMinimax(unittest.TestCase):
 
     def testXWin_2(self):
         g = Game('cpu', 'cpu')
-        g.make_move((Mark('x', 1), 1, 9), [])
-        g.make_move((Mark('o', 2), 7, 3), [])
-        g.make_move((Mark('x', 3), 7, 3), [])
         result = g.run_minimax()
         self.assertTrue(result == 0.5)
 
