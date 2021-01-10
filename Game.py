@@ -66,7 +66,6 @@ class Game(Board):
             if self.should_collapse:
                 move = self.players[turn % 2].play_collapse()
                 print(f'Player {self.players[turn % 2].label} collapsed {move} in turn {self.turn}\n')
-                self.moves.append(move)
                 self.make_move(move, [])
 
             if turn == 9 or self.game_over():  # game ended with collapse
@@ -74,7 +73,6 @@ class Game(Board):
 
             move = self.players[turn % 2].play_mark()
             print(f'Player {self.players[turn % 2].label} played {move} in turn {self.turn}\n')
-            self.moves.append(move)
             self.make_move(move, [])
             self.show_board()
 

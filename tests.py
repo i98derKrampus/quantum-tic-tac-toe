@@ -8,7 +8,6 @@ class TestMinimax(unittest.TestCase):
         g = Game('cpu', 'cpu')
         g.make_move((Mark('x', 1), 9, 1), [])
         g.make_move((Mark('o', 2), 2, 4), [])
-        g.make_move((Mark('x', 3), 1, 5), [])
         result = g.run_minimax()
         self.assertTrue(result == 1.0)
 
@@ -21,7 +20,6 @@ class TestMinimax(unittest.TestCase):
         g = Game('cpu', 'cpu')
         g.make_move((Mark('x', 1), 1, 5), [])
         g.make_move((Mark('o', 2), 5, 1), [])
-        g.make_move((Mark('o', 2), 5), [])
         result = g.run_minimax()
         self.assertTrue(result == 0)
 

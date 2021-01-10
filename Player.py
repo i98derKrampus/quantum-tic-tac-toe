@@ -40,6 +40,10 @@ class Bot(Player):
         self.__minimax_board = game.copy()
 
     def play_collapse(self):
+        if self.game.turn == 3:
+            p = self.__get_from_file()
+            return (Mark('o', 2), p)
+
         last_move = self.game.moves[-1]
         self.__minimax_board = self.game.copy()
         alpha, beta = -2, 2
@@ -55,6 +59,10 @@ class Bot(Player):
             move_dict = self.__get_from_file()
             npos1, npos2 = move_dict[(pos1, pos2)][0]
             return (Mark(self.label, self.game.turn), npos1, npos2)
+
+        if self.game.turn == 3:
+            p1, p2 = self.__get_from_file()
+            return (Mark(self.label, self.game.turn), p1, p2)
 
         alpha, beta = -2, 2
         self.__minimax_board = self.game.copy()
@@ -144,21 +152,71 @@ class Bot(Player):
         return False
 
     def __get_from_file(self):
-        lines = [x.strip() for x in open('assets/second_move_optimal').readlines()]
+        if self.game.turn == 2:
+            with open('assets/second_move_optimal') as f:
+                lines = [x.strip() for x in f.readlines()]
 
-        d = dict()
-        curr_key, rcurr_key = None, None
-        for line in lines:
-            x = line.split(',')
-            if x == ['']:
-                continue
+            d = dict()
+            curr_key, rcurr_key = None, None
+            for line in lines:
+                x = line.split(',')
+                if x == ['']:
+                    continue
 
-            ints = [int(x) for x in re.findall(r'\d+', line)]
-            if line.startswith('('):
-                curr_key = (ints[0], ints[1])
-                rcurr_key = (ints[1], ints[0])
-                d[curr_key], d[rcurr_key] = [], []
-            else:
-                d[curr_key].append((ints[0], ints[1]))
-                d[rcurr_key].append((ints[0], ints[1]))
-        return d
+                ints = [int(x) for x in re.findall(r'\d+', line)]
+                if line.startswith('('):
+                    curr_key = (ints[0], ints[1])
+                    rcurr_key = (ints[1], ints[0])
+                    d[curr_key], d[rcurr_key] = [], []
+                else:
+                    d[curr_key].append((ints[0], ints[1]))
+                    d[rcurr_key].append((ints[0], ints[1]))
+            return d
+        elif self.game.turn == 3:
+            with open('assets/third_move_optimal') as f:
+                lines = [x.strip() for x in f.readlines()]
+
+            moves = []
+            for i in range(2):
+                mark, p1, p2 = self.game.moves[i]
+                moves.append((p1, p2))
+            if len(self.game.moves) == 3:
+                mark, p = self.game.moves[-1]
+                if mark.label == 'x':
+                    moves.append(p)
+                else:
+                    mark2, pos1, pos2 = self.game.moves[-2]
+                    if p == pos1:
+                        moves.append(pos2)
+                    else:
+                        moves.append(pos1)
+
+            pairs = None
+            for line in lines:
+                x = line.split(',')
+                if x == ['']:
+                    continue
+                ints = [int(x) for x in re.findall(r'\d+', line)]
+                if line.startswith('('):
+                    pairs = []
+                    pairs.append((ints[0], ints[1]))
+                    pairs.append((ints[2], ints[3]))
+                    if len(ints) == 5:
+                        pairs.append(ints[4])
+
+                else:
+                    if len(pairs) != len(moves):
+                        continue
+                    m1, m2 = moves[0], moves[1]
+                    p1, p2 = m1
+                    p3, p4 = m2
+                    if ((p1, p2) == pairs[0] or (p2, p1) == pairs[0]) and ((p3, p4) == pairs[1] or (p4, p3) == pairs[1]):
+                        if len(moves) == 3:
+                            if moves[-1] == pairs[-1]:
+                                return ints[0], ints[1]
+                        else:
+                            if self.game.should_collapse:
+                                if p1 == ints[0]:
+                                    return p2
+                                return p1
+                            return ints[0], ints[1]
